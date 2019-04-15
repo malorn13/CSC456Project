@@ -6,8 +6,8 @@ const WIN_LEFT = 0; const WIN_RIGHT = 1;  // default left and right x coords in 
 const WIN_BOTTOM = 0; const WIN_TOP = 1;  // default top and bottom y coords in world space
 var Eye = new vec4.fromValues(0.5, 0.5, -0.5, 1.0); // default eye position in world space
 var viewUp = new vec3.fromValues(0.0, 1.0, 0.0); // look up vector
-var lookAt = new vec3.fromValues(0.0, 0.0, 1.0); // look at vector
-var center = new vec3.fromValues(0.5, 0.5, 0); // center of view
+var center = new vec3.fromValues(0.0, 0.0, 1.0); // look at vector
+var lookAt = new vec3.fromValues(0.5, 0.5, 0); // center of view
 var projection = mat4.create(); // projection matrix
 var modelview = mat4.create(); // modelview matrix
 var mode = 0; // mode for Phong vs Blinn-Phong
@@ -465,7 +465,7 @@ function renderTriangles() {
     var bgColor = (bgColor < 1) ? (bgColor + 0.001) : 0;
     gl.clearColor(bgColor, 0, 0, 1.0);
     var scale = [1, 1, 1];
-    requestAnimationFrame(renderTriangles);
+    //requestAnimationFrame(renderTriangles);
     setupShaders();
 
     for (var i = 0; i < triBufferSize; i += 3) {
@@ -805,9 +805,11 @@ window.addEventListener("keydown", function (event) {
 
 function main() {
 
+    var i = performance.now();
     setupWebGL(); // set up the webGL environment
     loadTriangles(); // load in the triangles from tri file
     //setupShaders(); // setup the webGL shaders
     renderTriangles(); // draw the triangles using webGL
+    console.log("Milliseconds taken: " + performance.now() - i);
 
 } // end main

@@ -316,13 +316,13 @@ function drawInputTrainglesUsingPaths(context) {
 /* main -- here is where execution begins after window load */
 
 function main() {
+	var i = performance.now();
 
 	// Get the canvas and context
 	var canvas = document.getElementById("viewport");
 	var context = canvas.getContext("2d");
 
-	drawInputTrainglesUsingPaths(context);
-
 	// Create the image
-
+	drawInputTrainglesUsingPaths(context);
+	console.log("Milliseconds taken: " + performance.now() - i);
 }
