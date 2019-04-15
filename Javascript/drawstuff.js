@@ -89,47 +89,6 @@ function normalize(v) {
 
 } // end normalize
 
-function shadePixel(imagedata, pixX, pixY, light, color, triangle, normal, intersection) {
-	var newColor = new Color(0, 0, 0, 255);
-	light = normalize(light);
-	intersection = normalize(intersection);
-	lVect = [light[0] - intersection[0], light[1] - intersection[1], light[2] - intersection[2]];
-	lVect = normalize(lVect); // normalize light vector
-	normal = normalize(normal); // normalize normal vector
-	var distance = 1 / Math.sqrt(dot(light, light));
-	distance = distance * distance;
-	var NdotL = Math.max(dot(normal, lVect), 0.0);
-
-	var negInt = [intersection[0] * -1, intersection[1] * -1, intersection[2] * -1];
-	var view = normalize(negInt);
-	var halfway = [lVect[0] + view[0], lVect[1] + view[1], lVect[2] + view[2]];
-	halfway = normalize(halfway); // normalize halfway vector
-	var NdotH = Math.max(dot(normal, halfway), 0.0);
-
-	// calc diffuse color
-	difColorR = truncate((triangle.material.diffuse[0] * 255) * (color.r / 255) * NdotL);
-	difColorG = truncate((triangle.material.diffuse[1] * 255) * (color.g / 255) * NdotL);
-	difColorB = truncate((triangle.material.diffuse[2] * 255) * (color.b / 255) * NdotL);
-
-	// calc specular color
-	specColorR = truncate((triangle.material.specular[0] * 255) * (color.r / 255) * truncate(Math.pow(NdotH, triangle.material.n + 1)));
-	specColorG = truncate((triangle.material.specular[1] * 255) * (color.g / 255) * truncate(Math.pow(NdotH, triangle.material.n + 1)));
-	specColorB = truncate((triangle.material.specular[2] * 255) * (color.b / 255) * truncate(Math.pow(NdotH, triangle.material.n + 1)));
-	//console.log("specColorR: " + truncate(Math.pow(NdotH,triangle.material.n+1)));
-
-	// calc ambient color
-	ambiColorR = triangle.material.ambient[0] * 255 * (color.r / 255);
-	ambiColorG = triangle.material.ambient[1] * 255 * (color.g / 255);
-	ambiColorB = triangle.material.ambient[2] * 255 * (color.b / 255);
-
-	// calc overall color
-	newColor.r = truncate(difColorR + specColorR + ambiColorR);
-	newColor.g = truncate(difColorG + specColorG + ambiColorG);
-	newColor.b = truncate(difColorB + specColorB + ambiColorB);
-
-	drawPixel(imagedata, pixX, pixY, newColor);
-} // end shade pixel
-
 // detect if a given intersection is inside an edge
 function side(n, i, v1, v2) {
 	var foo = [truncate(i[0] - v1[0]), truncate(i[1] - v1[1]), truncate(i[2] - v1[2])];
@@ -176,13 +135,193 @@ function fillTriangle(imageData, v0, v1, v2) {
 	}
 }
 
+//draw 2d projections traingle from the JSON file at class github
+function drawInputTrainglesUsingPaths(context) {
+	inputTriangles = [
+		{
+			"material": {
+				"ambient": [
+					0.1,
+					0.1,
+					0.1
+				],
+				"diffuse": [
+					0.6,
+					0.4,
+					0.4
+				],
+				"specular": [
+					0.3,
+					0.3,
+					0.3
+				],
+				"n": 11
+			},
+			"vertices": [
+				[
+					1 - 0.15,
+					1 - 0.6,
+					1 - 0.75
+				],
+				[
+					1 - 0.25,
+					1 - 0.9,
+					1 - 0.75
+				],
+				[
+					1 - 0.35,
+					1 - 0.6,
+					1 - 0.75
+				]
+			],
+			"normals": [
+				[
+					0,
+					0,
+					-1
+				],
+				[
+					0,
+					0,
+					-1
+				],
+				[
+					0,
+					0,
+					-1
+				]
+			],
+			"triangles": [
+				[
+					0,
+					1,
+					2
+				]
+			]
+		},
+		{
+			"material": {
+				"ambient": [
+					0.1,
+					0.1,
+					0.1
+				],
+				"diffuse": [
+					0.6,
+					0.6,
+					0.4
+				],
+				"specular": [
+					0.3,
+					0.3,
+					0.3
+				],
+				"n": 17
+			},
+			"vertices": [
+				[
+					1 - 0.15,
+					1 - 0.15,
+					1 - 0.75
+				],
+				[
+					1 - 0.15,
+					1 - 0.35,
+					1 - 0.75
+				],
+				[
+					1 - 0.35,
+					1 - 0.35,
+					1 - 0.75
+				],
+				[
+					1 - 0.35,
+					1 - 0.15,
+					1 - 0.75
+				]
+			],
+			"normals": [
+				[
+					0,
+					0,
+					-1
+				],
+				[
+					0,
+					0,
+					-1
+				],
+				[
+					0,
+					0,
+					-1
+				],
+				[
+					0,
+					0,
+					-1
+				]
+			],
+			"triangles": [
+				[
+					0,
+					1,
+					2
+				],
+				[
+					2,
+					3,
+					0
+				]
+			]
+		}
+	];
+	if (inputTriangles != String.null) {
+		var c = new Color(0, 0, 0, 0); // the color at the pixel: black
+		var w = context.canvas.width;
+		var h = context.canvas.height;
+		var n = inputTriangles.length;
+
+		// Loop over the input files
+		for (var f = 0; f < n; f++) {
+			var tn = inputTriangles[f].triangles.length;
+
+			// Loop over the triangles, draw each in 2d
+			for (var t = 0; t < tn; t++) {
+				var vertex1 = inputTriangles[f].triangles[t][0];
+				var vertex2 = inputTriangles[f].triangles[t][1];
+				var vertex3 = inputTriangles[f].triangles[t][2];
+
+				var vertexPos1 = inputTriangles[f].vertices[vertex1];
+				var vertexPos2 = inputTriangles[f].vertices[vertex2];
+				var vertexPos3 = inputTriangles[f].vertices[vertex3];
+
+				context.fillStyle =
+					"rgb(" + Math.floor(inputTriangles[f].material.diffuse[0] * 255)
+					+ "," + Math.floor(inputTriangles[f].material.diffuse[1] * 255)
+					+ "," + Math.floor(inputTriangles[f].material.diffuse[2] * 255) + ")"; // diffuse color
+
+				var path = new Path2D();
+				path.moveTo(w * vertexPos1[0], h * vertexPos1[1]);
+				path.lineTo(w * vertexPos2[0], h * vertexPos2[1]);
+				path.lineTo(w * vertexPos3[0], h * vertexPos3[1]);
+				path.closePath();
+				context.fill(path);
+
+			} // end for triangles
+		} // end for files
+	} // end if triangle files found
+} // end draw input triangles
+
 /* main -- here is where execution begins after window load */
 
 function main() {
 
 	// Get the canvas and context
 	var canvas = document.getElementById("viewport");
-	var context = canvas.getContext("3d");
+	var context = canvas.getContext("2d");
+
+	drawInputTrainglesUsingPaths(context);
 
 	// Create the image
 
