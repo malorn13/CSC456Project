@@ -810,6 +810,7 @@ function main() {
     loadTriangles(); // load in the triangles from tri file
     //setupShaders(); // setup the webGL shaders
     renderTriangles(); // draw the triangles using webGL
-    console.log("Milliseconds taken: " + performance.now() - i);
+    console.log("Milliseconds taken: ");
+    console.log(performance.now() - i);
 
 } // end main

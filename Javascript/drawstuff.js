@@ -324,5 +324,6 @@ function main() {
 
 	// Create the image
 	drawInputTrainglesUsingPaths(context);
-	console.log("Milliseconds taken: " + performance.now() - i);
+	console.log("Milliseconds taken: ");
+	console.log(performance.now() - i);
 }
