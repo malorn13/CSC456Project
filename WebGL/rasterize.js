@@ -4,10 +4,10 @@
 const WIN_Z = 0;  // default graphics window z coord in world space
 const WIN_LEFT = 0; const WIN_RIGHT = 1;  // default left and right x coords in world space
 const WIN_BOTTOM = 0; const WIN_TOP = 1;  // default top and bottom y coords in world space
-var Eye = new vec4.fromValues(0.5, 0.5, -0.5, 1.0); // default eye position in world space
+var Eye = new vec4.fromValues(0.2, 0.5, 0.1, 1.0); // default eye position in world space
 var viewUp = new vec3.fromValues(0.0, 1.0, 0.0); // look up vector
 var center = new vec3.fromValues(0.0, 0.0, 1.0); // look at vector
-var lookAt = new vec3.fromValues(0.5, 0.5, 0); // center of view
+var lookAt = new vec3.fromValues(0.2, 0.5, 0.6); // center of view
 var projection = mat4.create(); // projection matrix
 var modelview = mat4.create(); // modelview matrix
 var mode = 0; // mode for Phong vs Blinn-Phong
@@ -68,7 +68,7 @@ function setupWebGL() {
         if (gl == null) {
             throw "unable to create gl context -- is your browser gl ready?";
         } else {
-            gl.clearColor(0.0, 0.0, 0.0, 1.0); // use black when we clear the frame buffer
+            gl.clearColor(1.0, 1.0, 1.0, 1.0); // use black when we clear the frame buffer
             gl.clearDepth(1.0); // use max when we clear the depth buffer
             gl.enable(gl.DEPTH_TEST); // use hidden surface removal (with zbuffering)
         }
@@ -349,30 +349,12 @@ function setupShaders() {
     	uniform int mode; // Phong or Blinn-Phong lighting, 0 or 1
     	uniform float refE, diffW, ambiW, specW;
 
-    	const vec3 lightPos = vec3(-3, 1, -0.5); // light position
-    	
+        const vec3 lightPos = vec3(-3, 1, -0.5); // light position
+        
         void main(void) {
-        	vec3 normal = normalize(normalInterp);
-        	vec3 lightDir = normalize(lightPos - vertPos);
-        	
-        	float NdotL = max(dot(normal, lightDir), 0.0);
-        	float specular = 0.0;
-        	
-        	if (NdotL > 0.0) {
-        		vec3 viewDir = normalize(-vertPos);
-        		vec3 halfDir = normalize(lightDir + viewDir);
-        		float NdotH = max(dot(normal, halfDir), 0.0);
-        		float ref = reflectivity + refE;
-        		specular = pow(NdotH, ref);
-        		
-        		if (mode == 1) {
-        			vec3 reflectDir = reflect(-lightDir, normal);
-        			NdotH = max(dot(reflectDir, viewDir), 0.0);
-        			specular = pow(NdotH, reflectivity);
-        		}
-        	}
-        	gl_FragColor = vec4((ambientColor * ambiW) + NdotL * (diffuseColor * diffW) + specular * (specularColor * specW), 1.0);
+        	gl_FragColor = vec4(diffuseColor, 1.0);
         }
+        
     `;
 
     // define vertex shader in essl using es6 template strings
@@ -546,6 +528,7 @@ function renderTriangles() {
 
 } // end render triangles
 
+/*
 window.addEventListener("keydown", function (event) {
     if (event.defaultPrevented) {
         return; // do nothing if the event was already processed
@@ -799,6 +782,7 @@ window.addEventListener("keydown", function (event) {
 
     event.preventDefault();
 });
+*/
 
 
 /* MAIN -- HERE is where execution begins after window load */
